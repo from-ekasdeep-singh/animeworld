@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AnimeWorld - Explore Your Favorite Shows</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    :root {
+      --primary: #ff6b81;
+      --primary-dark: #ee5a6f;
+      --secondary: #4834df;
+      --dark: #2c3e50;
+      --light: #f8f9fa;
+      --shadow: rgba(0, 0, 0, 0.1);
+      --shadow-lg: rgba(0, 0, 0, 0.2);
+    }
+
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+      overflow-x: hidden;
+    }
+
+    /* Animated Background */
+    .bg-animation {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      opacity: 0.1;
+    }
+
+    .bg-animation span {
+      position: absolute;
+      display: block;
+      width: 20px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.3);
+      animation: float 25s infinite linear;
+      bottom: -150px;
+    }
+
+    .bg-animation span:nth-child(1) { left: 10%; animation-delay: 0s; width: 80px; height: 80px; }
+    .bg-animation span:nth-child(2) { left: 20%; animation-delay: 2s; width: 40px; height: 40px; }
+    .bg-animation span:nth-child(3) { left: 40%; animation-delay: 4s; width: 60px; height: 60px; }
+    .bg-animation span:nth-child(4) { left: 60%; animation-delay: 6s; width: 50px; height: 50px; }
+    .bg-animation span:nth-child(5) { left: 80%; animation-delay: 8s; width: 70px; height: 70px; }
+
+    @keyframes float {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; }
+    }
+
+    /* NAVBAR */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 60px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 30px var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      animation: slideDown 0.5s ease;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-100%); }
+      to { transform: translateY(0); }
+    }
+
+    .logo {
+      font-size: 1.8em;
+      font-weight: 700;
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    .logo:hover {
+      transform: scale(1.05);
+    }
+
+    .search-bar {
+      flex: 1;
+      margin: 0 40px;
+      display: flex;
+      position: relative;
+      max-width: 500px;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 12px 20px;
+      border: 2px solid transparent;
+      border-radius: 50px;
+      outline: none;
+      background: var(--light);
+      transition: all 0.3s;
+      font-size: 0.95em;
+    }
+
+    .search-bar input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(255, 107, 129, 0.1);
+    }
+
+    .search-bar button {
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
+      padding: 8px 24px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .search-bar button:hover {
+      transform: translateY(-50%) scale(1.05);
+      box-shadow: 0 4px 15px rgba(255, 107, 129, 0.4);
+    }
+
+    .search-bar button:active {
+      transform: translateY(-50%) scale(0.98);
+    }
+
+    /* CATEGORY DROPDOWN */
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .category {
+      background: linear-gradient(45deg, var(--secondary), #5f27cd);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(72, 52, 223, 0.3);
+    }
+
+    .category:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(72, 52, 223, 0.4);
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 55px;
+      right: 0;
+      background: white;
+      min-width: 200px;
+      box-shadow: 0 8px 30px var(--shadow-lg);
+      border-radius: 15px;
+      z-index: 10;
+      overflow: hidden;
+      animation: fadeInDown 0.3s ease;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dropdown-content a {
+      color: var(--dark);
+      padding: 14px 20px;
+      text-decoration: none;
+      display: block;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .dropdown-content a:hover {
+      background: linear-gradient(90deg, rgba(255, 107, 129, 0.1), transparent);
+      border-left-color: var(--primary);
+      padding-left: 25px;
+    }
+
+    .show {
+      display: block;
+    }
+
+    /* PROFILE */
+    .profile {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: bold;
+      color: white;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(255, 107, 129, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      transform: scale(0);
+      transition: transform 0.3s;
+    }
+
+    .profile:hover::before {
+      transform: scale(1);
+    }
+
+    .profile:hover {
+      transform: rotate(360deg) scale(1.1);
+    }
+
+    /* FILTER SECTION */
+    .filter-section {
+      padding: 30px 60px;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      animation: fadeIn 0.8s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .filter-btn {
+      padding: 10px 24px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 2px solid transparent;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+      color: var(--dark);
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      background: white;
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px var(--shadow);
+    }
+
+    /* MAIN CONTENT */
+    main {
+      padding: 20px 60px 60px;
+    }
+
+    .section-title {
+      color: white;
+      font-size: 2em;
+      font-weight: 700;
+      margin-bottom: 30px;
+      text-align: center;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 1s ease;
+    }
+
+    .anime-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 30px;
+      animation: fadeIn 1s ease;
+    }
+
+    .anime-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px var(--shadow);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      animation: cardEntry 0.6s ease backwards;
+    }
+
+    @keyframes cardEntry {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .anime-card:nth-child(1) { animation-delay: 0.1s; }
+    .anime-card:nth-child(2) { animation-delay: 0.15s; }
+    .anime-card:nth-child(3) { animation-delay: 0.2s; }
+    .anime-card:nth-child(4) { animation-delay: 0.25s; }
+    .anime-card:nth-child(5) { animation-delay: 0.3s; }
+    .anime-card:nth-child(6) { animation-delay: 0.35s; }
+    .anime-card:nth-child(7) { animation-delay: 0.4s; }
+    .anime-card:nth-child(8) { animation-delay: 0.45s; }
+
+    .anime-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(255, 107, 129, 0.8), rgba(72, 52, 223, 0.8));
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 1;
+    }
+
+    .anime-card:hover::before {
+      opacity: 1;
+    }
+
+    .anime-card:hover {
+      transform: translateY(-10px) scale(1.03);
+      box-shadow: 0 12px 40px var(--shadow-lg);
+    }
+
+    .anime-card-img-container {
+      position: relative;
+      overflow: hidden;
+      height: 320px;
+    }
+
+    .anime-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s;
+    }
+
+    .anime-card:hover img {
+      transform: scale(1.1);
+    }
+
+    .anime-card-content {
+      padding: 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .anime-card h3 {
+      font-size: 1.2em;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 8px;
+      transition: color 0.3s;
+    }
+
+    .anime-card:hover h3 {
+      color: white;
+    }
+
+    .anime-rating {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.9em;
+      color: #666;
+      margin-bottom: 10px;
+      transition: color 0.3s;
+    }
+
+    .anime-card:hover .anime-rating {
+      color: white;
+    }
+
+    .star {
+      color: #ffd700;
+    }
+
+    .anime-genre {
+      display: inline-block;
+      padding: 5px 12px;
+      background: rgba(255, 107, 129, 0.1);
+      border-radius: 20px;
+      font-size: 0.85em;
+      color: var(--primary);
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+
+    .anime-card:hover .anime-genre {
+      background: white;
+      color: var(--primary);
+    }
+
+    .view-btn {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 12px 30px;
+      background: white;
+      color: var(--primary);
+      border: none;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      z-index: 3;
+      transition: all 0.3s;
+    }
+
+    .anime-card:hover .view-btn {
+      display: block;
+      animation: bounceIn 0.5s ease;
+    }
+
+    @keyframes bounceIn {
+      0% { transform: translate(-50%, -50%) scale(0); }
+      50% { transform: translate(-50%, -50%) scale(1.1); }
+      100% { transform: translate(-50%, -50%) scale(1); }
+    }
+
+    .view-btn:hover {
+      background: var(--primary);
+      color: white;
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+
+    /* NO RESULTS */
+    .no-results {
+      text-align: center;
+      padding: 60px 20px;
+      color: white;
+      font-size: 1.3em;
+      display: none;
+    }
+
+    .no-results.show {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    /* SCROLL TO TOP */
+    .scroll-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5em;
+      box-shadow: 0 4px 20px var(--shadow);
+      z-index: 99;
+      transition: all 0.3s;
+    }
+
+    .scroll-top.show {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .scroll-top:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 25px var(--shadow-lg);
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--dark);
+      margin-top: 60px;
+      font-weight: 500;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 -4px 30px var(--shadow);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .anime-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      }
+      
+      header {
+        padding: 15px 30px;
+      }
+      
+      main, .filter-section {
+        padding-left: 30px;
+        padding-right: 30px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      header {
+        flex-wrap: wrap;
+        gap: 15px;
+        padding: 15px 20px;
+      }
+      
+      .search-bar {
+        order: 3;
+        width: 100%;
+        margin: 0;
+        max-width: none;
+      }
+      
+      .anime-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 20px;
+      }
+      
+      main, .filter-section {
+        padding: 20px;
+      }
+      
+      .section-title {
+        font-size: 1.5em;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .anime-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 15px;
+      }
+      
+      .filter-btn {
+        padding: 8px 16px;
+        font-size: 0.9em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="bg-animation">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <!-- NAVBAR -->
+  <header>
+    <div class="logo" onclick="resetFilters()">⚡ AnimeWorld</div>
+
+    <div class="search-bar">
+      <input type="text" placeholder="Search your favorite anime..." id="searchInput" onkeyup="handleSearch(event)">
+      <button onclick="searchAnime()">🔍 Search</button>
+    </div>
+
+    <div class="nav-actions">
+      <div class="dropdown">
+        <button class="category" onclick="toggleDropdown()">📚 Categories</button>
+        <div id="dropdownMenu" class="dropdown-content">
+          <a href="#" onclick="filterByCategory('Action')">⚔️ Action</a>
+          <a href="#" onclick="filterByCategory('Adventure')">🗺️ Adventure</a>
+          <a href="#" onclick="filterByCategory('Romance')">💕 Romance</a>
+          <a href="#" onclick="filterByCategory('Fantasy')">✨ Fantasy</a>
+          <a href="#" onclick="filterByCategory('Comedy')">😂 Comedy</a>
+          <a href="#" onclick="filterByCategory('Horror')">👻 Horror</a>
+          <a href="#" onclick="filterByCategory('Sci-Fi')">🚀 Sci-Fi</a>
+          <a href="#" onclick="filterByCategory('Shounen')">🔥 Shounen</a>
+        </div>
+      </div>
+
+      <div class="profile">A</div>
+    </div>
+  </header>
+
+  <!-- FILTER SECTION -->
+  <div class="filter-section">
+    <button class="filter-btn active" onclick="filterByRating('all')">🌟 All Anime</button>
+    <button class="filter-btn" onclick="filterByRating('high')">⭐ Top Rated (4.5+)</button>
+    <button class="filter-btn" onclick="filterByRating('popular')">🔥 Most Popular</button>
+    <button class="filter-btn" onclick="sortAnime('az')">🔤 A-Z</button>
+    <button class="filter-btn" onclick="sortAnime('za')">🔤 Z-A</button>
+  </div>
+
+  <!-- MAIN -->
+  <main>
+    <h2 class="section-title">✨ Discover Amazing Anime</h2>
+    
+    <div class="anime-grid" id="animeGrid">
+      <!-- Cards will be dynamically generated -->
+    </div>
+
+    <div class="no-results" id="noResults">
+      <h2>😔 No anime found</h2>
+      <p>Try searching with different keywords</p>
+    </div>
+  </main>
+
+  <!-- Scroll to Top Button -->
+  <button class="scroll-top" id="scrollTop" onclick="scrollToTop()">↑</button>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>⚡ Made with ❤️ for Anime Lovers | &copy; 2025 AnimeWorld. All Rights Reserved.</p>
+  </footer>
+
+  <!-- ENHANCED JAVASCRIPT -->
+  <script>
+    // Anime Database
+    const animeData = [
+      {
+        name: "Demon Slayer",
+        image: "./demon slayer.jpg",
+        rating: 4.8,
+        genre: "Action",
+        popularity: 98
+      },
+      {
+        name: "Attack on Titan",
+        image: "./attack on titan.jpg",
+        rating: 4.9,
+        genre: "Action",
+        popularity: 99
+      },
+      {
+        name: "Jujutsu Kaisen",
+        image: "./jjk.jpg",
+        rating: 4.7,
+        genre: "Action",
+        popularity: 96
+      },
+      {
+        name: "My Hero Academia",
+        image: "./myhero.jpg",
+        rating: 4.6,
+        genre: "Shounen",
+        popularity: 94
+      },
+      {
+        name: "Chainsaw Man",
+        image: "./chainsaw.jpg",
+        rating: 4.5,
+        genre: "Horror",
+        popularity: 92
+      },
+      {
+        name: "One Piece",
+        image: "./one piece.jpg",
+        rating: 4.9,
+        genre: "Adventure",
+        popularity: 100
+      },
+      {
+        name: "Naruto",
+        image: "./naruto.jpg",
+        rating: 4.8,
+        genre: "Shounen",
+        popularity: 97
+      },
+      {
+        name: "Bleach",
+        image: "./bleach.jpg",
+        rating: 4.6,
+        genre: "Action",
+        popularity: 90
+      },
+      {
+        name: "Tokyo Ghoul",
+        image: "./tokyo.jpg",
+        rating: 4.4,
+        genre: "Horror",
+        popularity: 88
+      },
+      {
+        name: "Death Note",
+        image: "./death note.jpg",
+        rating: 4.9,
+        genre: "Sci-Fi",
+        popularity: 95
+      },
+      {
+        name: "Fullmetal Alchemist",
+        image: "./fullmetal.jpg",
+        rating: 4.9,
+        genre: "Fantasy",
+        popularity: 99
+      },
+      {
+        name: "Sword Art Online",
+        image: "./swordart.jpg",
+        rating: 4.3,
+        genre: "Fantasy",
+        popularity: 85
+      }
+    ];
+
+    let currentAnimeList = [...animeData];
+
+    // Initialize page
+    function init() {
+      renderAnimeCards(currentAnimeList);
+      setupScrollToTop();
+    }
+
+    // Render anime cards
+    function renderAnimeCards(animeList) {
+      const grid = document.getElementById('animeGrid');
+      const noResults = document.getElementById('noResults');
+      
+      if (animeList.length === 0) {
+        grid.style.display = 'none';
+        noResults.classList.add('show');
+        return;
+      }
+      
+      grid.style.display = 'grid';
+      noResults.classList.remove('show');
+      
+      grid.innerHTML = animeList.map(anime => `
+        <div class="anime-card" data-genre="${anime.genre}" data-rating="${anime.rating}" data-popularity="${anime.popularity}">
+          <div class="anime-card-img-container">
+            <img src="${anime.image}" alt="${anime.name}" onerror="this.src='https://via.placeholder.com/300x400?text=${anime.name}'">
+            <button class="view-btn" onclick="viewAnime('${anime.name}')">View Details</button>
+          </div>
+          <div class="anime-card-content">
+            <h3>${anime.name}</h3>
+            <div class="anime-rating">
+              <span class="star">⭐</span>
+              <span>${anime.rating}/5.0</span>
+            </div>
+            <span class="anime-genre">${anime.genre}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Search functionality
+    function searchAnime() {
+      const input = document.getElementById('searchInput').value.toLowerCase().trim();
+      
+      if (input === '') {
+        currentAnimeList = [...animeData];
+      } else {
+        currentAnimeList = animeData.filter(anime => 
+          anime.name.toLowerCase().includes(input) || 
+          anime.genre.toLowerCase().includes(input)
+        );
+      }
+      
+      renderAnimeCards(currentAnimeList);
+    }
+
+    // Handle search on Enter key
+    function handleSearch(event) {
+      if (event.key === 'Enter') {
+        searchAnime();
+      }
+    }
+
+    // Filter by category
+    function filterByCategory(category) {
+      currentAnimeList = animeData.filter(anime => anime.genre === category);
+      renderAnimeCards(currentAnimeList);
+      toggleDropdown();
+      
+      // Update filter buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    }
+
+    // Filter by rating
+    function filterByRating(type) {
+      const buttons = document.querySelectorAll('.filter-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      switch(type) {
+        case 'all':
+          currentAnimeList = [...animeData];
+          break;
+        case 'high':
+          currentAnimeList = animeData.filter(anime => anime.rating >= 4.5);
+          break;
+        case 'popular':
+          currentAnimeList = [...animeData].sort((a, b) => b.popularity - a.popularity);
+          break;
+      }
+      
+      renderAnimeCards(currentAnimeList);
+    }
+
+    // Sort anime
+    function sortAnime(order) {
+      const buttons = document.querySelectorAll('.filter-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      currentAnimeList = [...currentAnimeList].sort((a, b) => {
+        if (order === 'az') {
+          return a.name.localeCompare(b.name);
+        } else {
+          return b.name.localeCompare(a.name);
+        }
+      });
+      
+      renderAnimeCards(currentAnimeList);
+    }
+
+    // Reset filters
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      currentAnimeList = [...animeData];
+      renderAnimeCards(currentAnimeList);
+      
+      // Reset active filter button
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector('.filter-btn').classList.add('active');
+    }
+
+    // View anime details (placeholder)
+    function viewAnime(name) {
+      alert(`🎬 Viewing details for: ${name}\n\n✨ This feature would show more information about the anime, including episodes, trailers, and reviews!`);
+    }
+
+    // Dropdown toggle
+    function toggleDropdown() {
+      document.getElementById("dropdownMenu").classList.toggle("show");
+    }
+
+    // Close dropdown when clicking outside
+    window.onclick = function(event) {
+      if (!event.target.matches('.category')) {
+        const dropdowns = document.getElementsByClassName("dropdown-content");
+        for (let i = 0; i < dropdowns.length; i++) {
+          dropdowns[i].classList.remove('show');
+        }
+      }
+    }
+
+    // Scroll to top functionality
+    function setupScrollToTop() {
+      const scrollBtn = document.getElementById('scrollTop');
+      
+      window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 300) {
+          scrollBtn.classList.add('show');
+        } else {
+          scrollBtn.classList.remove('show');
+        }
+      });
+    }
+
+    function scrollToTop() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', init);
+
+    // Add some interactivity to profile
+    document.addEventListener('DOMContentLoaded', () => {
+      const profile = document.querySelector('.profile');
+      if (profile) {
+        profile.addEventListener('click', () => {
+          alert('👤 Profile Features:\n\n• View your watchlist\n• Manage favorites\n• Track viewing history\n• Personalized recommendations');
+        });
+      }
+    });
+  </script>
+</body>
+</html>
